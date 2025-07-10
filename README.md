@@ -16,8 +16,7 @@ ai-coding-guide/
 │   ├── 00-setup.md
 │   ├── 01-dijkstra.md
 │   ├── 02-todo.md
-│   ├── 02-typescript-execution.md
-│   ├── 03-game.md
+│   ├── 03-ink-game.md
 │   ├── 04-mcp.md
 │   ├── 05-survivor-game.md
 │   ├── 06-typechecker.md
@@ -74,9 +73,9 @@ git switch -c playground # playground ブランチを作成して、そこで作
 **指示**:
 
 ```
-このプロジェクトでは、AIコーディングのためのトレーニング教材やデモを作成します。
-最初のものを作ります。
-最初に作るものの名前は 00-setup です。ESModuleでvitestが実行できる設定を構築してください。src/index.test.ts を作成してpnpm test が動作することを確認して。README.md にユーザーがその状態まで辿り着けるステップを記述してください。
+このプロジェクトでは、AIコーディングのためのトレーニング教材やデモを作成します。最初のものを作ります。
+
+最初に作るものは examples/00-setup です。ESModuleでvitestが実行できる設定を構築してください。src/index.test.ts を作成してpnpm test が動作することを確認して。README.md にユーザーがその状態まで辿り着けるステップを記述してください。
 
 guides/00-setup.md は claude-code または vscode+cline のセットアップ手順を含みます。
 ```

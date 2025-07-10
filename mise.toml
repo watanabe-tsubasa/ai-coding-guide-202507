@@ -1,2 +1,7 @@
 [tools]
 node = "24.4.0"
+
+[tasks.install]
+run = """
+echo hello
+"""
