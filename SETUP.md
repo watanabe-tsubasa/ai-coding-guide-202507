@@ -19,3 +19,9 @@ eval "$(starship init bash)"
 echo 'eval "$(~/.local/bin/mise activate zsh)"' >> ~/.zshrc
 eval "$(starship init zsh)"
 ```
+
+## MCP を使ってみる
+
+```bash
+claude mcp add readability npx -- -y @mizchi/readability --mcp
+```
