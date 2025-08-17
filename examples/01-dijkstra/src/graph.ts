@@ -9,13 +9,13 @@ export type Edge = {
 };
 
 export class Graph {
-  private nodes: Set<string> = new Set();
-  private adjacencyList: Map<string, Array<{ node: string; weight: number }>> = new Map();
+  private nodes: Map<string, Node> = new Map();
+  private edges: Map<string, Edge[]> = new Map();
 
   addNode(id: string): void {
-    this.nodes.add(id);
-    if (!this.adjacencyList.has(id)) {
-      this.adjacencyList.set(id, []);
+    if (!this.nodes.has(id)) {
+      this.nodes.set(id, { id });
+      this.edges.set(id, []);
     }
   }
 
@@ -27,16 +27,17 @@ export class Graph {
       this.addNode(to);
     }
 
-    const neighbors = this.adjacencyList.get(from) || [];
-    neighbors.push({ node: to, weight });
-    this.adjacencyList.set(from, neighbors);
+    const fromEdges = this.edges.get(from);
+    if (fromEdges) {
+      fromEdges.push({ from, to, weight });
+    }
   }
 
   getNeighbors(nodeId: string): Array<{ node: string; weight: number }> {
-    return this.adjacencyList.get(nodeId) || [];
-  }
-
-  getNodes(): string[] {
-    return Array.from(this.nodes);
+    const nodeEdges = this.edges.get(nodeId);
+    if (!nodeEdges) {
+      return [];
+    }
+    return nodeEdges.map(edge => ({ node: edge.to, weight: edge.weight }));
   }
 }
