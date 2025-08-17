@@ -40,4 +40,8 @@ export class Graph {
     }
     return nodeEdges.map(edge => ({ node: edge.to, weight: edge.weight }));
   }
+
+  getNodes(): IterableIterator<string> {
+    return this.nodes.keys();
+  }
 }
