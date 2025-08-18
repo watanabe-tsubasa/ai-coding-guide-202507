@@ -1,0 +1,29 @@
+{
+  "name": "02-todo",
+  "version": "1.0.0",
+  "description": "A simple TODO application with SQLite",
+  "main": "src/index.ts",
+  "type": "module",
+  "bin": {
+    "todo": "dist/index.js"
+  },
+  "scripts": {
+    "test": "vitest",
+    "start": "tsx src/index.ts",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "devDependencies": {
+    "@prisma/client": "^6.14.0",
+    "@types/node": "^22.0.0",
+    "prisma": "^6.14.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
