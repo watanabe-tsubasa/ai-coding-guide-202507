@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 type GameLoopCallback = (deltaTime: number) => void;
 
 export const useGameLoop = (callback: GameLoopCallback, isRunning = true) => {
-  const loopId = useRef<number>();
+  const loopId = useRef<number>(null);
   const lastTime = useRef<number>(0);
 
   useEffect(() => {

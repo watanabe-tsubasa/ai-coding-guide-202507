@@ -25,3 +25,7 @@ export const normalize = (v: Vector): Vector => {
   }
   return { x: v.x / mag, y: v.y / mag };
 };
+
+export const multiply = (v: Vector, scalar: number): Vector => {
+  return { x: v.x * scalar, y: v.y * scalar };
+};
