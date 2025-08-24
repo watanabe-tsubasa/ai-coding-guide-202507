@@ -3,13 +3,15 @@ import { useKeyboard } from '../hooks/useKeyboard';
 import { useGameLoop } from '../hooks/useGameLoop';
 import { subtract, normalize, distance, multiply } from '../utils/physics';
 import { generateSpawnPoint } from '../utils/spawner';
-import type { GameState } from '../types/game';
+import type { GameState, Upgrade } from '../types/game';
 import Player from './Player';
 import Enemy from './Enemy';
 import Bullet from './Bullet';
 import ExperienceOrb from './Experience';
 import GameUI from './GameUI';
 import GameOverScreen from './GameOverScreen';
+import UpgradeScreen from './UpgradeScreen';
+import { upgrades } from '../utils/upgrades';
 
 const initialGameState: GameState = {
   player: {
@@ -19,6 +21,10 @@ const initialGameState: GameState = {
     health: 100,
     level: 1,
     experience: 0,
+    speed: 300,
+    fireRate: 1,
+    bulletSpeed: 500,
+    bulletDamage: 10,
   },
   enemies: [],
   bullets: [],
@@ -33,23 +39,27 @@ const GAME_AREA_HEIGHT = 1200;
 const Game: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>(initialGameState);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [isLevelingUp, setIsLevelingUp] = useState(false);
   const pressedKeys = useKeyboard();
   const nextSpawnTime = useRef(5000); // Spawn every 5 seconds
   const nextShootTime = useRef(1000); // Shoot every 1 second
 
   const update = useCallback((deltaTime: number) => {
-    const playerSpeed = 300; // pixels per second
 
     setGameState((prev) => {
       const newGameTime = prev.gameTime + deltaTime;
 
       const newPlayerPos = { ...prev.player.position };
-      const moveDistance = playerSpeed * (deltaTime / 1000);
+      const moveDistance = prev.player.speed * (deltaTime / 1000);
 
       if (pressedKeys.has('ArrowUp')) newPlayerPos.y -= moveDistance;
       if (pressedKeys.has('ArrowDown')) newPlayerPos.y += moveDistance;
       if (pressedKeys.has('ArrowLeft')) newPlayerPos.x -= moveDistance;
       if (pressedKeys.has('ArrowRight')) newPlayerPos.x += moveDistance;
+
+      // Clamp player position to game area
+      newPlayerPos.x = Math.max(prev.player.radius, Math.min(GAME_AREA_WIDTH - prev.player.radius, newPlayerPos.x));
+      newPlayerPos.y = Math.max(prev.player.radius, Math.min(GAME_AREA_HEIGHT - prev.player.radius, newPlayerPos.y));
 
       const newEnemies = prev.enemies.map(enemy => {
         const direction = normalize(subtract(newPlayerPos, enemy.position));
@@ -63,7 +73,7 @@ const Game: React.FC = () => {
 
       const newEnemiesWithSpawn = newEnemies;
       if (newGameTime > nextSpawnTime.current) {
-        const spawnPoint = generateSpawnPoint(newPlayerPos, 400); // 400 is a placeholder for view radius
+        const spawnPoint = generateSpawnPoint(newPlayerPos, 400, { width: GAME_AREA_WIDTH, height: GAME_AREA_HEIGHT }); // 400 is a placeholder for view radius
         const newEnemy = {
           id: `enemy-${newGameTime}`,
           position: spawnPoint,
@@ -89,12 +99,12 @@ const Game: React.FC = () => {
         const newBullet = {
           id: `bullet-${newGameTime}`,
           position: { ...newPlayerPos },
-          velocity: multiply(bulletDirection, 500), // Bullet speed
+          velocity: multiply(bulletDirection, prev.player.bulletSpeed), // Bullet speed
           radius: 5,
-          damage: 10,
+          damage: prev.player.bulletDamage,
         };
         newBullets.push(newBullet);
-        nextShootTime.current = newGameTime + 1000; // 1 second cooldown
+        nextShootTime.current = newGameTime + 1000 / prev.player.fireRate; // 1 second cooldown
       }
 
       // Update bullet positions
@@ -163,7 +173,7 @@ const Game: React.FC = () => {
       if (finalExperience >= experienceToNextLevel) {
         newLevel++;
         finalExperience -= experienceToNextLevel;
-        // You can add level up effects here in the future
+        setIsLevelingUp(true);
       }
 
       return {
@@ -183,14 +193,30 @@ const Game: React.FC = () => {
     });
   }, [pressedKeys]);
 
-  useGameLoop(isGameOver ? () => {} : update);
+  useGameLoop(isGameOver || isLevelingUp ? () => {} : update);
 
   const handleRestart = () => {
     setGameState(initialGameState);
     setIsGameOver(false);
   };
 
+  const handleSelectUpgrade = (upgrade: Upgrade) => {
+    setGameState((prev) => ({
+      ...prev,
+      player: {
+        ...prev.player,
+        ...upgrade.apply(prev.player),
+      },
+    }));
+    setIsLevelingUp(false);
+  };
+
   const { player } = gameState;
+
+  const getUpgradeOptions = (): Upgrade[] => {
+    const shuffled = [...upgrades].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 3);
+  };
 
   // Center the camera on the player
   const cameraX = player.position.x - 400;
@@ -199,6 +225,7 @@ const Game: React.FC = () => {
   return (
     <div style={{ position: 'relative', width: '800px', height: '600px' }}>
       {isGameOver && <GameOverScreen onRestart={handleRestart} />}
+      {isLevelingUp && <UpgradeScreen upgrades={getUpgradeOptions()} onSelectUpgrade={handleSelectUpgrade} />}
       <GameUI player={player} />
       <svg
         width="800"

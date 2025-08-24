@@ -14,6 +14,19 @@ export interface Player extends GameObject {
   health: number;
   level: number;
   experience: number;
+  speed: number;
+  fireRate: number; // shots per second
+  bulletSpeed: number;
+  bulletDamage: number;
+}
+
+export type UpgradeType = 'speed' | 'fireRate' | 'bulletSpeed' | 'bulletDamage';
+
+export interface Upgrade {
+  type: UpgradeType;
+  title: string;
+  description: string;
+  apply: (player: Player) => Partial<Player>;
 }
 
 export interface Enemy extends GameObject {
